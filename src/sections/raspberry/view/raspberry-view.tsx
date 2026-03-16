@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
@@ -13,21 +12,36 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 import {LedItem} from '../raspberry-led';
 
+// ----------------------------------------------------------------------
+
+const LED_CONFIGS = [
+  { id: 'red', label: 'Red LED', color: 'error' as const },
+  { id: 'blue', label: 'Blue LED', color: 'info' as const },
+];
+
+// ----------------------------------------------------------------------
+
 export function RaspberryView() {
   const [ipAddress, setIpAddress] = useState(
     () => localStorage.getItem('raspberry_ip') || '192.168.0.100'
   );
-  const [redLedOn, setRedLedOn] = useState(false);
-  const [blueLedOn, setBlueLedOn] = useState(false);
+
+  const [ledStates, setLedStates] = useState<Record<string, boolean>>({
+    red: false,
+    blue: false,
+  });
+
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  const handleRedLedChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setRedLedOn(event.target.checked);
-  }, []);
-
-  const handleBlueLedChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setBlueLedOn(event.target.checked);
-  }, []);
+  const handleLedChange = useCallback(
+    (id: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      setLedStates((prev) => ({
+        ...prev,
+        [id]: event.target.checked,
+      }));
+    },
+    []
+  );
 
   const handleIpChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setIpAddress(event.target.value);
@@ -44,23 +58,6 @@ export function RaspberryView() {
     }
     setOpenSnackbar(false);
   }, []);
-
-  const ledConfigs = [
-    {
-      id: 'red',
-      label: 'Red LED',
-      color: 'error' as const,
-      checked: redLedOn,
-      onChange: handleRedLedChange,
-    },
-    {
-      id: 'blue',
-      label: 'Blue LED',
-      color: 'info' as const,
-      checked: blueLedOn,
-      onChange: handleBlueLedChange,
-    },
-  ];
 
   return (
     <DashboardContent>
@@ -93,13 +90,13 @@ export function RaspberryView() {
       </Box>
 
       <Grid container spacing={3}>
-        {ledConfigs.map((led) => (
-          <Grid key={led.id} size={{ xs: 12, md: 3 }}>
+        {LED_CONFIGS.map((config) => (
+          <Grid key={config.id} size={{ xs: 12, md: 3 }}>
             <LedItem
-              label={led.label}
-              color={led.color}
-              checked={led.checked}
-              onChange={led.onChange}
+              label={config.label}
+              color={config.color}
+              checked={ledStates[config.id] || false}
+              onChange={handleLedChange(config.id)}
             />
           </Grid>
         ))}
