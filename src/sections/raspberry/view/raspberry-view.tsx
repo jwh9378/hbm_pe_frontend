@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react';
+import { varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
 import Checkbox from '@mui/material/Checkbox';
 import Typography from '@mui/material/Typography';
-import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -38,35 +39,65 @@ export function RaspberryView() {
         </Typography>
       </Box>
 
-      <Card sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <Typography variant="h6">LED On/Off</Typography>
-        <Box sx={{ display: 'flex', gap: 3 }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={redLedOn}
-                onChange={handleRedLedChange}
-                color="error"
-                icon={<Iconify icon={"mdi:lightbulb-outline" as any} />}
-                checkedIcon={<Iconify icon={"mdi:lightbulb-on" as any} />}
-              />
-            }
-            label="Red"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={blueLedOn}
-                onChange={handleBlueLedChange}
-                color="info"
-                icon={<Iconify icon={"mdi:lightbulb-outline" as any} />}
-                checkedIcon={<Iconify icon={"mdi:lightbulb-on" as any} />}
-              />
-            }
-            label="Blue"
-          />
-        </Box>
-      </Card>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
+          <Card
+            sx={{
+              p: 3,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              transition: (theme) => theme.transitions.create(['background-color']),
+              ...(redLedOn && {
+                bgcolor: (theme) => varAlpha(theme.vars.palette.error.mainChannel, 0.16),
+              }),
+            }}
+          >
+            <Checkbox
+              checked={redLedOn}
+              onChange={handleRedLedChange}
+              color="error"
+              icon={<Iconify width={32} icon={"mdi:lightbulb-outline" as any} />}
+              checkedIcon={<Iconify width={32} icon={"mdi:lightbulb-on" as any} />}
+            />
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="subtitle1">Red LED</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                {redLedOn ? 'Currently ON' : 'Currently OFF'}
+              </Typography>
+            </Box>
+          </Card>
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 3 }}>
+          <Card
+            sx={{
+              p: 3,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              transition: (theme) => theme.transitions.create(['background-color']),
+              ...(blueLedOn && {
+                bgcolor: (theme) => varAlpha(theme.vars.palette.info.mainChannel, 0.16),
+              }),
+            }}
+          >
+            <Checkbox
+              checked={blueLedOn}
+              onChange={handleBlueLedChange}
+              color="info"
+              icon={<Iconify width={32} icon={"mdi:lightbulb-outline" as any} />}
+              checkedIcon={<Iconify width={32} icon={"mdi:lightbulb-on" as any} />}
+            />
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="subtitle1">Blue LED</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                {blueLedOn ? 'Currently ON' : 'Currently OFF'}
+              </Typography>
+            </Box>
+          </Card>
+        </Grid>
+      </Grid>
     </DashboardContent>
   );
 }
