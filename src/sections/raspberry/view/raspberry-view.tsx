@@ -1,17 +1,12 @@
 import { useState, useCallback } from 'react';
-import { varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
-import Checkbox from '@mui/material/Checkbox';
 import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import { Iconify } from 'src/components/iconify';
-
-// ----------------------------------------------------------------------
+import {LedItem} from '../raspberry-led';
 
 export function RaspberryView() {
   const [redLedOn, setRedLedOn] = useState(false);
@@ -24,6 +19,23 @@ export function RaspberryView() {
   const handleBlueLedChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setBlueLedOn(event.target.checked);
   }, []);
+
+  const ledConfigs = [
+    {
+      id: 'red',
+      label: 'Red LED',
+      color: 'error' as const,
+      checked: redLedOn,
+      onChange: handleRedLedChange,
+    },
+    {
+      id: 'blue',
+      label: 'Blue LED',
+      color: 'info' as const,
+      checked: blueLedOn,
+      onChange: handleBlueLedChange,
+    },
+  ];
 
   return (
     <DashboardContent>
@@ -40,63 +52,16 @@ export function RaspberryView() {
       </Box>
 
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 3 }}>
-          <Card
-            sx={{
-              p: 3,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2,
-              transition: (theme) => theme.transitions.create(['background-color']),
-              ...(redLedOn && {
-                bgcolor: (theme) => varAlpha(theme.vars.palette.error.mainChannel, 0.16),
-              }),
-            }}
-          >
-            <Checkbox
-              checked={redLedOn}
-              onChange={handleRedLedChange}
-              color="error"
-              icon={<Iconify width={32} icon={"mdi:lightbulb-outline" as any} />}
-              checkedIcon={<Iconify width={32} icon={"mdi:lightbulb-on" as any} />}
+        {ledConfigs.map((led) => (
+          <Grid key={led.id} size={{ xs: 12, md: 3 }}>
+            <LedItem
+              label={led.label}
+              color={led.color}
+              checked={led.checked}
+              onChange={led.onChange}
             />
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="subtitle1">Red LED</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                {redLedOn ? 'Currently ON' : 'Currently OFF'}
-              </Typography>
-            </Box>
-          </Card>
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 3 }}>
-          <Card
-            sx={{
-              p: 3,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2,
-              transition: (theme) => theme.transitions.create(['background-color']),
-              ...(blueLedOn && {
-                bgcolor: (theme) => varAlpha(theme.vars.palette.info.mainChannel, 0.16),
-              }),
-            }}
-          >
-            <Checkbox
-              checked={blueLedOn}
-              onChange={handleBlueLedChange}
-              color="info"
-              icon={<Iconify width={32} icon={"mdi:lightbulb-outline" as any} />}
-              checkedIcon={<Iconify width={32} icon={"mdi:lightbulb-on" as any} />}
-            />
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="subtitle1">Blue LED</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                {blueLedOn ? 'Currently ON' : 'Currently OFF'}
-              </Typography>
-            </Box>
-          </Card>
-        </Grid>
+          </Grid>
+        ))}
       </Grid>
     </DashboardContent>
   );
