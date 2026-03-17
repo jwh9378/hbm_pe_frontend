@@ -62,6 +62,12 @@ export const sendRaspberryCommand = async (ipAddress: string, commandText: strin
  * @param commandId 조회할 명령 ID
  */
 export const getCommandStatus = async (commandId: number) => {
-  const response = await apiClient.get(`/api/v1/command/${commandId}`);
+  const response = await apiClient.get(`/api/v1/command/${commandId}`, {
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
   return response.data;
 };
