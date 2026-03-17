@@ -23,7 +23,7 @@ const LED_CONFIGS = [
 
 export function RaspberryView() {
   const [ipAddress, setIpAddress] = useState(
-    () => localStorage.getItem('raspberry_ip') || '192.168.0.100'
+    () => localStorage.getItem('target_device_ip') || '192.168.0.100'
   );
 
   const [ledStates, setLedStates] = useState<Record<string, boolean>>({
@@ -48,7 +48,7 @@ export function RaspberryView() {
   }, []);
 
   const handleApplyIp = useCallback(() => {
-    localStorage.setItem('raspberry_ip', ipAddress);
+    localStorage.setItem('target_device_ip', ipAddress);
     setOpenSnackbar(true);
   }, [ipAddress]);
 
@@ -93,10 +93,12 @@ export function RaspberryView() {
         {LED_CONFIGS.map((config) => (
           <Grid key={config.id} size={{ xs: 12, md: 3 }}>
             <LedItem
+              id={config.id}
               label={config.label}
               color={config.color}
               checked={ledStates[config.id] || false}
               onChange={handleLedChange(config.id)}
+              ipAddress={ipAddress}
             />
           </Grid>
         ))}
