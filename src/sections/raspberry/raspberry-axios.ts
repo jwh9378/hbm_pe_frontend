@@ -1,4 +1,4 @@
-import axios, { InternalAxiosRequestConfig } from 'axios';
+import axios, { InternalAxiosRequestConfig, AxiosError } from 'axios';
 
 // 환경 변수를 사용하여 개발/상용 모드에 따라 백엔드 URL을 동적으로 설정합니다.
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
@@ -24,13 +24,13 @@ apiClient.interceptors.request.use(
 
     return config;
   },
-  (error: any) => Promise.reject(error)
+  (error) => Promise.reject(error)
 );
 
 // 3. 응답(Response) 인터셉터 설정
 apiClient.interceptors.response.use(
-  (response: any) => response,
-  (error: { response: { status: any; }; message: any; }) => {
+  (response) => response,
+  (error: AxiosError) => {
     // 모든 요청에 대한 공통 에러 처리 로직
     console.error('[API Error]:', error.response?.status, error.message);
 
@@ -54,5 +54,14 @@ export const sendRaspberryCommand = async (ipAddress: string, commandText: strin
     target_device_ip: ipAddress,
     command_text: commandText,
   });
+  return response.data;
+};
+
+/**
+ * 라즈베리파이 명령의 백그라운드 실행 상태를 조회합니다.
+ * @param commandId 조회할 명령 ID
+ */
+export const getCommandStatus = async (commandId: number) => {
+  const response = await apiClient.get(`/api/v1/command/${commandId}`);
   return response.data;
 };
