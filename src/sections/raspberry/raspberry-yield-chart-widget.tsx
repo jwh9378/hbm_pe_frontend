@@ -33,16 +33,31 @@ export function RaspberryYieldChartWidget() {
       </Box>
       
       <Box sx={{ px: 1.5, pb: 1.5 }} dir="ltr">
-        <Box sx={{ position: 'relative', height: 150 }}>
+        <Box sx={{ position: 'relative', height: 210 }}>
           <Stack direction="row" alignItems="flex-end" justifyContent="space-between" sx={{ height: '100%' }}>
-            {MOCK_YIELD_DATA.map((item) => {
+            {MOCK_YIELD_DATA.map((item, index) => {
               const passHeight = (item.pass / maxTotal) * 100;
               const failHeight = (item.fail / maxTotal) * 100;
 
               return (
                 <Tooltip key={item.day} title={`Pass: ${item.pass} / Fail: ${item.fail}`} arrow placement="top">
                   <Stack alignItems="center" spacing={0.5} sx={{ width: '10%', cursor: 'pointer', '&:hover .bar': { opacity: 0.8 } }}>
-                    <Stack justifyContent="flex-end" sx={{ height: 100, width: '100%', position: 'relative' }}>
+                    <Stack
+                      justifyContent="flex-end"
+                      sx={{
+                        height: 160,
+                        width: '100%',
+                        position: 'relative',
+                        transformOrigin: 'bottom', // 바닥을 기준으로 커지도록 설정
+                        transform: 'scaleY(0)', // 애니메이션 시작 전 높이 0으로 숨김
+                        animation: 'growUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+                        animationDelay: `${index * 0.1}s`, // 왼쪽부터 순차적으로 자라남
+                        '@keyframes growUp': {
+                          '0%': { transform: 'scaleY(0)' },
+                          '100%': { transform: 'scaleY(1)' },
+                        },
+                      }}
+                    >
                       <Box
                         className="bar"
                         sx={{
