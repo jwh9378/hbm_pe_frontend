@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import {LedItem} from '../raspberry-led';
+import { RaspberryStatusWidget, ConnectionStatus } from '../raspberry-status-widget';
 
 // ----------------------------------------------------------------------
 
@@ -32,6 +33,26 @@ export function RaspberryView() {
   });
 
   const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  // 장비 연결 상태 관리를 위한 State
+  const [backendStatus, setBackendStatus] = useState<ConnectionStatus>('checking');
+  const [piAStatus, setPiAStatus] = useState<ConnectionStatus>('checking');
+  const [piBStatus, setPiBStatus] = useState<ConnectionStatus>('checking');
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [lastResult, setLastResult] = useState<string | null>(null);
+
+  // 추후 API 또는 WebSocket을 통해 연결 상태를 받아오는 로직을 여기에 구현합니다.
+  // 현재는 예시로 1.5초 뒤에 모두 온라인으로 바뀌도록 시뮬레이션 합니다.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setBackendStatus('ready');
+      setPiAStatus('ready');
+      setPiBStatus('ready');
+      setLastUpdate(new Date());
+      setLastResult('PASS'); // 테스트용 임시 결과 데이터
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLedChange = useCallback(
     (id: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,6 +124,32 @@ export function RaspberryView() {
           </Grid>
         ))}
       </Grid>
+
+      <Box
+        sx={{
+          mt: 8,
+          mb: 3,
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: 2,
+        }}
+      >
+        <Typography variant="h4" sx={{ flexGrow: 1 }}>
+          ATE Dashboard
+        </Typography>
+      </Box>
+
+      {/* 상태 요약 대시보드 위젯 */}
+      <Box sx={{ mb: 3 }}>
+        <RaspberryStatusWidget
+          backendStatus={backendStatus}
+          piAStatus={piAStatus}
+          piBStatus={piBStatus}
+          lastUpdate={lastUpdate}
+          lastResult={lastResult}
+        />
+      </Box>
 
       <Snackbar
         open={openSnackbar}
