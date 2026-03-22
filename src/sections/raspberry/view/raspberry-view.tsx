@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import {LedItem} from '../raspberry-led';
+import { TestRunWidget } from '../raspberry-test-run-widget';
 import { RaspberryStatusWidget, ConnectionStatus } from '../raspberry-status-widget';
 
 // ----------------------------------------------------------------------
@@ -141,7 +142,7 @@ export function RaspberryView() {
       </Box>
 
       {/* 상태 요약 대시보드 위젯 */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 2 }}>
         <RaspberryStatusWidget
           backendStatus={backendStatus}
           piAStatus={piAStatus}
@@ -150,6 +151,13 @@ export function RaspberryView() {
           lastResult={lastResult}
         />
       </Box>
+
+      {/* 테스트 실행 및 대기 목록 */}
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <TestRunWidget />
+        </Grid>
+      </Grid>
 
       <Snackbar
         open={openSnackbar}
