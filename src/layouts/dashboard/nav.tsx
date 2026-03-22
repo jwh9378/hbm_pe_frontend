@@ -1,10 +1,11 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
 import ListItem from '@mui/material/ListItem';
+import Collapse from '@mui/material/Collapse';
 import { useTheme } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
@@ -13,6 +14,7 @@ import { usePathname } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 
 import { Logo } from 'src/components/logo';
+import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
 import { NavUpgrade } from '../components/nav-upgrade';
@@ -107,6 +109,133 @@ export function NavMobile({
 
 // ----------------------------------------------------------------------
 
+function NavItemNode({ item, pathname }: { item: NavItem; pathname: string }) {
+  const hasChildren = !!item.children && item.children.length > 0;
+  const isActived = item.path === pathname;
+  const isChildActive = hasChildren ? item.children!.some((child) => child.path === pathname) : false;
+
+  const [open, setOpen] = useState(isChildActive);
+
+  const handleClick = () => {
+    setOpen(!open);
+  };
+
+  const renderItem = (
+    <ListItem disableGutters disablePadding>
+      <ListItemButton
+        disableGutters
+        // 하위 메뉴가 있으면 단순 클릭(div), 없으면 라우터 이동
+        component={hasChildren ? 'div' : RouterLink}
+        href={hasChildren ? undefined : item.path}
+        onClick={hasChildren ? handleClick : undefined}
+        sx={[
+          (theme) => ({
+            pl: 2,
+            py: 1,
+            gap: 2,
+            pr: 1.5,
+            borderRadius: 0.75,
+            typography: 'body2',
+            fontWeight: 'fontWeightMedium',
+            color: theme.vars.palette.text.secondary,
+            minHeight: 44,
+            ...((isActived || isChildActive) && {
+              fontWeight: 'fontWeightSemiBold',
+              color: theme.vars.palette.primary.main,
+              bgcolor: varAlpha(theme.vars.palette.primary.mainChannel, 0.08),
+              '&:hover': {
+                bgcolor: varAlpha(theme.vars.palette.primary.mainChannel, 0.16),
+              },
+            }),
+          }),
+        ]}
+      >
+        <Box component="span" sx={{ width: 24, height: 24 }}>
+          {item.icon}
+        </Box>
+
+        <Box component="span" sx={{ flexGrow: 1 }}>
+          {item.title}
+        </Box>
+
+        {item.info && item.info}
+
+        {hasChildren && (
+          <Iconify
+            icon={open ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'}
+            width={16}
+            sx={{ ml: 1, flexShrink: 0 }}
+          />
+        )}
+      </ListItemButton>
+    </ListItem>
+  );
+
+  if (!hasChildren) {
+    return renderItem;
+  }
+
+  return (
+    <>
+      {renderItem}
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        <Box component="ul" sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, pl: 3.5, pt: 0.5, pb: 1 }}>
+          {item.children?.map((child) => {
+            const isChildActived = child.path === pathname;
+            return (
+              <ListItem disableGutters disablePadding key={child.title}>
+                <ListItemButton
+                  disableGutters
+                  component={RouterLink}
+                  href={child.path}
+                  sx={[
+                    (theme) => ({
+                      pl: 1.5,
+                      py: 0.75,
+                      pr: 1.5,
+                      borderRadius: 0.75,
+                      typography: 'body2',
+                      fontSize: '0.8125rem', // 폰트 사이즈를 약간 더 작게
+                      fontWeight: 'fontWeightMedium',
+                      color: theme.vars.palette.text.secondary,
+                      minHeight: 32, // 높이를 낮춰 컴팩트하게
+                      transition: theme.transitions.create(['color', 'background-color']),
+                      ...(isChildActived && {
+                        fontWeight: 'fontWeightSemiBold',
+                        color: theme.vars.palette.primary.main,
+                        bgcolor: varAlpha(theme.vars.palette.primary.mainChannel, 0.08),
+                        '&:hover': {
+                          bgcolor: varAlpha(theme.vars.palette.primary.mainChannel, 0.16),
+                        },
+                      }),
+                    }),
+                  ]}
+                >
+                  <Box
+                    component="span"
+                    sx={{
+                      width: 4,
+                      height: 4,
+                      borderRadius: '50%',
+                      bgcolor: isChildActived ? 'primary.main' : 'text.disabled',
+                      transition: (theme) => theme.transitions.create(['transform', 'background-color']),
+                      ...(isChildActived && { transform: 'scale(1.5)' }),
+                      mr: 2, // 텍스트와의 간격
+                    }}
+                  />
+                  <Box component="span" sx={{ flexGrow: 1, letterSpacing: '0.3px' }}>{child.title}</Box>
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </Box>
+      </Collapse>
+    </>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
   const pathname = usePathname();
 
@@ -138,50 +267,9 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
               flexDirection: 'column',
             }}
           >
-            {data.map((item) => {
-              const isActived = item.path === pathname;
-
-              return (
-                <ListItem disableGutters disablePadding key={item.title}>
-                  <ListItemButton
-                    disableGutters
-                    component={RouterLink}
-                    href={item.path}
-                    sx={[
-                      (theme) => ({
-                        pl: 2,
-                        py: 1,
-                        gap: 2,
-                        pr: 1.5,
-                        borderRadius: 0.75,
-                        typography: 'body2',
-                        fontWeight: 'fontWeightMedium',
-                        color: theme.vars.palette.text.secondary,
-                        minHeight: 44,
-                        ...(isActived && {
-                          fontWeight: 'fontWeightSemiBold',
-                          color: theme.vars.palette.primary.main,
-                          bgcolor: varAlpha(theme.vars.palette.primary.mainChannel, 0.08),
-                          '&:hover': {
-                            bgcolor: varAlpha(theme.vars.palette.primary.mainChannel, 0.16),
-                          },
-                        }),
-                      }),
-                    ]}
-                  >
-                    <Box component="span" sx={{ width: 24, height: 24 }}>
-                      {item.icon}
-                    </Box>
-
-                    <Box component="span" sx={{ flexGrow: 1 }}>
-                      {item.title}
-                    </Box>
-
-                    {item.info && item.info}
-                  </ListItemButton>
-                </ListItem>
-              );
-            })}
+            {data.map((item) => (
+              <NavItemNode key={item.title} item={item} pathname={pathname} />
+            ))}
           </Box>
         </Box>
       </Scrollbar>

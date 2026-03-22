@@ -10,6 +10,7 @@ export type NavItem = {
   path: string;
   icon: React.ReactNode;
   info?: React.ReactNode;
+  children?: { title: string; path: string }[];
 };
 
 export const navData = [
@@ -52,5 +53,9 @@ export const navData = [
     title: 'RaspberryPi',
     path: '/raspberry',
     icon: icon('ic-raspberry'),
+    children: [
+      { title: 'LED Test', path: '/raspberry/led-test' },
+      { title: 'ATE Dashboard', path: '/raspberry/ate-dashboard' },
+    ],
   },
 ];

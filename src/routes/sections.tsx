@@ -18,7 +18,8 @@ export const UserPage = lazy(() => import('src/pages/user'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
-export const RaspberryPage = lazy(() => import('src/pages/raspberry'));
+export const RaspberryLEDPage = lazy(() => import('src/pages/raspberry/led-test'));
+export const RaspberryDashboardPage = lazy(() => import('src/pages/raspberry/ate-dashboard'));
 
 const renderFallback = () => (
   <Box
@@ -54,7 +55,13 @@ export const routesSection: RouteObject[] = [
       { path: 'user', element: <UserPage /> },
       { path: 'products', element: <ProductsPage /> },
       { path: 'blog', element: <BlogPage /> },
-      { path: 'raspberry', element: <RaspberryPage /> },
+      {
+        path: 'raspberry',
+        children: [
+          { path: 'led-test', element: <RaspberryLEDPage /> },
+          { path: 'ate-dashboard', element: <RaspberryDashboardPage /> },
+        ],
+      },
     ],
   },
   {
