@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
@@ -12,6 +13,8 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 import {LedItem} from '../raspberry-led';
 import { TestRunWidget } from '../raspberry-test-run-widget';
+import { RaspberryYieldChartWidget } from '../raspberry-yield-chart-widget';
+import { RaspberryFailPieChartWidget } from '../raspberry-fail-pie-chart-widget';
 import { RaspberryStatusWidget, ConnectionStatus } from '../raspberry-status-widget';
 
 // ----------------------------------------------------------------------
@@ -154,8 +157,14 @@ export function RaspberryView() {
 
       {/* 테스트 실행 및 대기 목록 */}
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, md: 7 }}>
           <TestRunWidget />
+        </Grid>
+        <Grid size={{ xs: 12, md: 5 }}>
+          <Stack spacing={2}>
+            <RaspberryYieldChartWidget />
+            <RaspberryFailPieChartWidget />
+          </Stack>
         </Grid>
       </Grid>
 
