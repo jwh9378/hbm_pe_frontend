@@ -14,6 +14,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import {LedItem} from '../raspberry-led';
 import { TestRunWidget } from '../raspberry-test-run-widget';
 import { RaspberryYieldChartWidget } from '../raspberry-yield-chart-widget';
+import { RaspberryTestHistoryWidget } from '../raspberry-test-history-widget';
 import { RaspberryFailPieChartWidget } from '../raspberry-fail-pie-chart-widget';
 import { RaspberryStatusWidget, ConnectionStatus } from '../raspberry-status-widget';
 
@@ -96,7 +97,7 @@ export function RaspberryView() {
         }}
       >
         <Typography variant="h4" sx={{ flexGrow: 1 }}>
-          Raspberry Pi Test
+          Raspberry Pi LED Test
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -140,7 +141,7 @@ export function RaspberryView() {
         }}
       >
         <Typography variant="h4" sx={{ flexGrow: 1 }}>
-          ATE Dashboard
+          Raspberry Pi ATE PoC Dashboard
         </Typography>
       </Box>
 
@@ -156,7 +157,7 @@ export function RaspberryView() {
       </Box>
 
       {/* 테스트 실행 및 대기 목록 */}
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 7 }}>
           <TestRunWidget />
         </Grid>
@@ -167,6 +168,11 @@ export function RaspberryView() {
           </Stack>
         </Grid>
       </Grid>
+
+      {/* 최근 테스트 이력 테이블 */}
+      <Box sx={{ mt: 2 }}>
+        <RaspberryTestHistoryWidget />
+      </Box>
 
       <Snackbar
         open={openSnackbar}

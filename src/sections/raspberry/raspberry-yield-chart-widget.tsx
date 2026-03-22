@@ -25,7 +25,7 @@ export function RaspberryYieldChartWidget() {
   return (
     <Card>
       <Box sx={{ px: 1.5, pt: 1.5, pb: 0.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant="subtitle2">Weekly Yield</Typography>
+        <Typography variant="subtitle1">Weekly Test Results</Typography>
         <Stack direction="row" spacing={1}>
           <Stack direction="row" alignItems="center" spacing={0.5}><Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main' }} /><Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>Pass</Typography></Stack>
           <Stack direction="row" alignItems="center" spacing={0.5}><Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'error.main' }} /><Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>Fail</Typography></Stack>
