@@ -11,3 +11,5 @@ export const CONFIG: ConfigValue = {
   appName: 'Minimal UI',
   appVersion: packageJson.version,
 };
+
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';

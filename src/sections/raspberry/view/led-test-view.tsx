@@ -20,7 +20,7 @@ const LED_CONFIGS = [
 // ----------------------------------------------------------------------
 
 export function RaspberryView() {
-  const { ipAddress, handleIpChange } = useRaspberryIp();
+  const { ipAddress, inputIp, handleIpChange, handleApplyIp } = useRaspberryIp();
 
   const [ledStates, setLedStates] = useState<Record<string, boolean>>({
     red: false,
@@ -52,7 +52,11 @@ export function RaspberryView() {
           RaspberryPi LED Test
         </Typography>
 
-        <RaspberryIpSetting ipAddress={ipAddress} onIpChange={handleIpChange} />
+        <RaspberryIpSetting 
+          inputIp={inputIp} 
+          onIpChange={handleIpChange} 
+          onApplyIp={handleApplyIp} 
+        />
       </Box>
 
       <Grid container spacing={3}>

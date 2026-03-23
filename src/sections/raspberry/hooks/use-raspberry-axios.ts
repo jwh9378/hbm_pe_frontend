@@ -1,7 +1,6 @@
 import axios, { InternalAxiosRequestConfig, AxiosError } from 'axios';
 
-// 환경 변수를 사용하여 개발/상용 모드에 따라 백엔드 URL을 동적으로 설정합니다.
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+import { BACKEND_URL } from 'src/config-global';
 
 // 1. Axios 인스턴스 생성
 const apiClient = axios.create({

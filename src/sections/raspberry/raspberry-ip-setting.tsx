@@ -7,17 +7,18 @@ import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 
 type Props = {
-  ipAddress: string;
+  inputIp: string;
   onIpChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onApplyIp: () => void;
 };
 
-export function RaspberryIpSetting({ ipAddress, onIpChange }: Props) {
+export function RaspberryIpSetting({ inputIp, onIpChange, onApplyIp }: Props) {
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const handleApplyIp = useCallback(() => {
-    localStorage.setItem('target_device_ip', ipAddress);
+    onApplyIp(); // 부모로부터 전달받은 훅의 apply 액션 실행
     setOpenSnackbar(true);
-  }, [ipAddress]);
+  }, [onApplyIp]);
 
   const handleCloseSnackbar = useCallback((event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
@@ -32,7 +33,7 @@ export function RaspberryIpSetting({ ipAddress, onIpChange }: Props) {
         <TextField
           size="small"
           label="RaspberryPi IP Address"
-          value={ipAddress}
+          value={inputIp}
           onChange={onIpChange}
           placeholder="192.168.0.100"
           sx={{ width: { xs: 200, sm: 240 } }}
@@ -49,7 +50,7 @@ export function RaspberryIpSetting({ ipAddress, onIpChange }: Props) {
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert onClose={handleCloseSnackbar} severity="success" variant="filled" sx={{ width: '100%' }}>
-          라즈베리파이 IP가 {ipAddress}(으)로 설정되었습니다.
+          라즈베리파이 IP가 {inputIp}(으)로 설정되었습니다.
         </Alert>
       </Snackbar>
     </>

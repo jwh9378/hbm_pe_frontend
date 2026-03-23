@@ -6,14 +6,14 @@ import Divider from '@mui/material/Divider';
 import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
-export type ConnectionStatus = 'ready' | 'not ready' | 'checking';
+export type ConnectionStatus = 'ready' | 'not ready';
 
 interface Props {
   backendStatus: ConnectionStatus;
   piAStatus: ConnectionStatus;
   piBStatus: ConnectionStatus;
-  lastUpdate: Date | null;
   lastResult?: string | null;
+  lastUpdate: Date | null;
 }
 
 // 상태에 따른 색상 매핑
@@ -21,7 +21,6 @@ const getStatusColor = (status: ConnectionStatus) => {
   switch (status) {
     case 'ready': return 'success.main';
     case 'not ready': return 'error.main';
-    case 'checking': return 'warning.main';
     default: return 'text.disabled';
   }
 };
@@ -94,7 +93,9 @@ export function RaspberryStatusWidget({ backendStatus, piAStatus, piBStatus, las
           </Box>
           <Box>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>Updated</Typography>
-            <Typography variant="subtitle2">{lastUpdate ? lastUpdate.toLocaleTimeString() : 'N/A'}</Typography>
+            <Typography variant="subtitle2">
+              {lastUpdate ? lastUpdate.toLocaleString() : 'N/A'}
+            </Typography>
           </Box>
         </Stack>
       </Stack>

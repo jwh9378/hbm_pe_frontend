@@ -12,9 +12,9 @@ import { useErrorMessage } from 'src/hooks/error-message';
 
 import { Iconify } from 'src/components/iconify';
 
-import { sendRaspberryCommand } from 'src/sections/raspberry/raspberry-axios';
+import { sendRaspberryCommand } from 'src/sections/raspberry/hooks/use-raspberry-axios';
 
-import { useCommandPolling } from './hooks/command-polling';
+import { useCommandPolling } from './hooks/use-command-polling';
 
 type LedItemProps = {
   id: string;

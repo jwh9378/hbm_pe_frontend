@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-import { getCommandStatus } from 'src/sections/raspberry/raspberry-axios';
+import { getCommandStatus } from 'src/sections/raspberry/hooks/use-raspberry-axios';
 
 export function useCommandPolling() {
   const [isLoading, setIsLoading] = useState(false);
