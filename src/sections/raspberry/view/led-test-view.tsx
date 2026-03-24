@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { LedItem } from '../raspberry-led';
-import { useRaspberryIp } from '../hooks/use-raspberry-ip';
+import { useRaspberryIp } from '../core/use-raspberry-ip';
 import { RaspberryIpSetting } from '../raspberry-ip-setting';
 
 // ----------------------------------------------------------------------

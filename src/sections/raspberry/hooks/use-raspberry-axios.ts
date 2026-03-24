@@ -70,3 +70,46 @@ export const getCommandStatus = async (commandId: number) => {
   });
   return response.data;
 };
+
+/**
+ * 라즈베리파이 테스트 프로그램 명령을 전송합니다.
+ * @param action 실행할 명령 ('start' | 'stop')
+ */
+export const sendTestCommand = async (action: 'start' | 'stop') => {
+  const response = await apiClient.post(`/api/v1/raspberry/test/${action}`);
+  return response.data;
+};
+
+/**
+ * 라즈베리파이의 대기열(Queue) 목록을 조회합니다.
+ */
+export const fetchRaspberryQueue = async () => {
+  const response = await apiClient.get(`/api/v1/raspberry/pgm_queue`, {
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
+  return response.data;
+};
+
+/**
+ * 라즈베리파이의 대기열(Queue)에 새 테스트를 추가합니다.
+ * @param payload 추가할 테스트 정보
+ */
+export const addRaspberryQueue = async (
+  payload: { name: string }
+) => {
+  const response = await apiClient.post(`/api/v1/raspberry/pgm_queue`, payload);
+  return response.data;
+};
+
+/**
+ * 라즈베리파이의 대기열(Queue)에서 특정 테스트를 삭제합니다.
+ * @param id 삭제할 테스트 ID
+ */
+export const removeRaspberryQueue = async (id: number) => {
+  const response = await apiClient.delete(`/api/v1/raspberry/pgm_queue/${id}`);
+  return response.data;
+};

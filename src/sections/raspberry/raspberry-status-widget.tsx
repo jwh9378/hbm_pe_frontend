@@ -6,7 +6,7 @@ import Divider from '@mui/material/Divider';
 import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
-export type ConnectionStatus = 'ready' | 'not ready';
+import { ConnectionStatus } from './core/use-raspberry-status';
 
 interface Props {
   backendStatus: ConnectionStatus;

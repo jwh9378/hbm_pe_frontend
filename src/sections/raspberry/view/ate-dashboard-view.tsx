@@ -5,11 +5,11 @@ import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import { useRaspberryIp } from '../hooks/use-raspberry-ip';
+import { useRaspberryIp } from '../core/use-raspberry-ip';
 import { RaspberryIpSetting } from '../raspberry-ip-setting';
 import { TestRunWidget } from '../raspberry-test-run-widget';
+import { useRaspberryStatus } from '../core/use-raspberry-status';
 import { RaspberryStatusWidget } from '../raspberry-status-widget';
-import { useRaspberryStatus } from '../hooks/use-raspberry-status';
 import { RaspberryYieldChartWidget } from '../raspberry-yield-chart-widget';
 import { RaspberryTestHistoryWidget } from '../raspberry-test-history-widget';
 import { RaspberryFailPieChartWidget } from '../raspberry-fail-pie-chart-widget';
@@ -54,7 +54,9 @@ export function RaspberryDashboardView() {
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 7 }}>
-          <TestRunWidget />
+          <TestRunWidget
+            ipAddress={ipAddress}
+          />
         </Grid>
 
         <Grid size={{ xs: 12, md: 5 }}>
