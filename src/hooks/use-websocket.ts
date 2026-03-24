@@ -52,8 +52,10 @@ export function useWebSocket({
 
       // 1000은 정상 종료 코드입니다. 비정상 종료 시 지수 백오프 기반 재연결을 시도합니다.
       if (event.code !== 1000 && retryCountRef.current < maxRetries) {
-        const delay = 1000 * (2 ** retryCountRef.current);
+        // 최대 대기 시간을 30초로 제한하여 너무 오래 기다리지 않게 방지합니다.
+        const delay = Math.min(1000 * (2 ** retryCountRef.current), 30000);
         retryCountRef.current += 1;
+        console.log(`[WebSocket] ${delay}ms 후 재연결 시도... (${retryCountRef.current}/${maxRetries})`);
         reconnectTimerRef.current = setTimeout(connect, delay);
       }
     };
@@ -65,6 +67,7 @@ export function useWebSocket({
     return () => {
       if (reconnectTimerRef.current) {
         clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = undefined;
       }
       if (wsRef.current) {
         // 이벤트 리스너 제거
