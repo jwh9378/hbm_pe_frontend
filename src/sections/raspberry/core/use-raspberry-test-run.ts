@@ -18,7 +18,7 @@ export const MOCK_SCENARIOS = [
   { label: 'Test Scenario 3 (Full Check)' },
 ];
 
-type TestStatus = 'PENDING' | 'RUNNING' | 'FAILED' | 'COMPLETED';
+type TestStatus = 'PENDING' | 'RUNNING' | 'COMPLETED' | 'ABORTED' | 'ERROR';
 
 export interface QueueItem {
   id: number;
@@ -29,9 +29,9 @@ export interface QueueItem {
 }
 
 type WsMessage =
-  | { type: 'TEST_STATUS_CHANGED'; id: number; status: string }
-  | { type: 'TEST_COMPLETED'; id: number; status: 'FAILED' | 'COMPLETED' }
-  | { type: 'QUEUE_PAUSED'; message?: string };
+  | { type: 'TEST_STATUS_CHANGED'; id: number; status: 'PENDING' | 'RUNNING' }
+  | { type: 'TEST_COMPLETED'; id: number; status: 'COMPLETED' }
+  | { type: 'QUEUE_PAUSED'; id: number; status: 'ABORTED' | 'ERROR'; message?: string };
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -99,11 +99,6 @@ export function useTestRun(ipAddress: string) {
     return () => clearInterval(timer);
   }, [isRunning, runningTest]);
 
-  // 현재 실행 중인 테스트 ID가 변경되면(새로운 테스트가 시작되면) 경과 시간을 0으로 초기화
-  useEffect(() => {
-    setElapsedTime(0);
-  }, [runningTest?.id]);
-
   useEffect(() => {
     fetchQueue();
   }, [fetchQueue]);
@@ -136,9 +131,9 @@ export function useTestRun(ipAddress: string) {
         }
 
         // 테스트 실패 또는 큐 일시정지 시 스낵바(에러 메시지)에 메시지 출력
-        if (data.type === 'TEST_COMPLETED' && data.status === 'FAILED') {
-          setErrorMessage(`테스트가 실패했습니다. (ID: ${data.id})`);
-        } else if (data.type === 'QUEUE_PAUSED') {
+        if (data.type === 'QUEUE_PAUSED' && data.status === 'ABORTED') {
+          setErrorMessage(`테스트가 중지되었습니다. (REQ-ID: ${data.id})`);
+        } else if (data.type === 'QUEUE_PAUSED' && data.status === 'ERROR') {
           setErrorMessage(data.message || '오류로 인해 테스트가 중지되었습니다.');
         }
       } catch (error) {

@@ -83,17 +83,24 @@ export function RaspberryStatusWidget({ backendStatus, piAStatus, piBStatus, las
         {/* 오른쪽: 메타 정보 그룹 (결과, 업데이트 시간) */}
         <Stack direction="row" spacing={5} alignItems="center" minWidth={{ md: 250 }} justifyContent={{ xs: 'space-between', md: 'flex-start' }}>
           <Box>
-            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>Last Result</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
+              Last Status
+            </Typography>
             <Chip
               label={lastResult || 'N/A'}
-              color={lastResult === 'PASS' ? 'success' : lastResult === 'FAIL' ? 'error' : 'default'}
+              color={lastResult === 'COMPLETED' ? 'success'
+                : lastResult === 'ERROR' ? 'error'
+                : lastResult === 'ABORTED' ? 'warning'
+                : 'default'}
               size="small"
               sx={{ fontWeight: 'bold' }}
             />
           </Box>
           <Box>
-            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>Updated</Typography>
-            <Typography variant="subtitle2">
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
+              Updated
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.first', fontWeight: 'bold' }}>
               {lastUpdate ? lastUpdate.toLocaleString() : 'N/A'}
             </Typography>
           </Box>

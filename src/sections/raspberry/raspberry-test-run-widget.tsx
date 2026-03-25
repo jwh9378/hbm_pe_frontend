@@ -1,9 +1,12 @@
+import { useState } from 'react';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import List from '@mui/material/List';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
+import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Snackbar from '@mui/material/Snackbar';
@@ -14,7 +17,10 @@ import CardHeader from '@mui/material/CardHeader';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
+import DialogTitle from '@mui/material/DialogTitle';
 import ListItemText from '@mui/material/ListItemText';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import LinearProgress from '@mui/material/LinearProgress';
 
 import { Iconify } from 'src/components/iconify';
@@ -43,6 +49,8 @@ export function TestRunWidget({ ipAddress }: Props) {
     handleRemoveQueue,
     formatTime,
   } = useTestRun(ipAddress);
+
+  const [confirmStopOpen, setConfirmStopOpen] = useState(false);
 
   const totalPendingCount = Math.max(0, totalCount - (isRunning ? 1 : 0));
   const hiddenCount = totalPendingCount - queue.length;
@@ -120,24 +128,31 @@ export function TestRunWidget({ ipAddress }: Props) {
                 </Box>
               </Box>
 
-          <Stack direction="row" spacing={1} alignItems="center">
-            {isRunning && (
-              <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 'bold', color: 'text.secondary', px: 1 }}>
-                {formatTime(elapsedTime)}
-              </Typography>
-            )}
-            <Button
-              size="small"
-              variant="contained"
-              color={isRunning ? 'error' : 'primary'}
-              onClick={isRunning ? handleStop : handleStart}
-              startIcon={<Iconify icon={isRunning ? "mdi:stop-circle-outline" : "mdi:play-circle-outline"} />}
-              sx={{ flexShrink: 0, height: 32 }}
-              disabled={!isWsConnected}
-            >
-              {isRunning ? 'Stop' : 'Start'}
-            </Button>
-          </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                {isRunning && (
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 'bold', color: 'text.secondary', px: 1 }}>
+                    {formatTime(elapsedTime)}
+                  </Typography>
+                )}
+                <Button
+                  size="small"
+                  variant="contained"
+                  color={isRunning ? 'error' : 'primary'}
+                  onClick={(e) => {
+                    if (isRunning) {
+                      e.currentTarget.blur(); // 포커스를 해제하여 aria-hidden 경고 방지
+                      setConfirmStopOpen(true);
+                    } else {
+                      handleStart();
+                    }
+                  }}
+                  startIcon={<Iconify icon={isRunning ? "mdi:stop-circle-outline" : "mdi:play-circle-outline"} />}
+                  sx={{ flexShrink: 0, height: 32 }}
+                  disabled={!isWsConnected}
+                >
+                  {isRunning ? 'Stop' : 'Start'}
+                </Button>
+              </Stack>
             </Box>
           </Box>
 
@@ -204,7 +219,7 @@ export function TestRunWidget({ ipAddress }: Props) {
                         secondary={
                           <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0 }}>
                             <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                              {item.id}
+                              {"REQ-" + item.id}
                             </Typography>
                             <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'text.disabled' }} />
                             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -243,6 +258,28 @@ export function TestRunWidget({ ipAddress }: Props) {
           {errorMessage}
         </Alert>
       </Snackbar>
+
+      <Dialog open={confirmStopOpen} onClose={() => setConfirmStopOpen(false)}>
+        <DialogTitle sx={{ pb: 2 }}>
+          Stop test?
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to stop the currently running test?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmStopOpen(false)} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={() => {
+            handleStop();
+            setConfirmStopOpen(false);
+          }} color="error" variant="contained">
+            Stop
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }
