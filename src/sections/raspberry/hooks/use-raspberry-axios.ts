@@ -73,18 +73,23 @@ export const getCommandStatus = async (commandId: number) => {
 
 /**
  * 라즈베리파이 테스트 프로그램 명령을 전송합니다.
+ * @param ipAddress 대상 기기 IP 주소
  * @param action 실행할 명령 ('start' | 'stop')
  */
-export const sendTestCommand = async (action: 'start' | 'stop') => {
-  const response = await apiClient.post(`/api/v1/raspberry/test/${action}`);
+export const sendTestCommand = async (ipAddress: string, action: 'start' | 'stop') => {
+  const response = await apiClient.post(`/api/v1/raspberry/test/${action}`, null, {
+    params: { target_device_ip: ipAddress },
+  });
   return response.data;
 };
 
 /**
  * 라즈베리파이의 대기열(Queue) 목록을 조회합니다.
+ * @param ipAddress 대상 기기 IP 주소
  */
-export const fetchRaspberryQueue = async () => {
+export const fetchRaspberryQueue = async (ipAddress: string) => {
   const response = await apiClient.get(`/api/v1/raspberry/pgm_queue`, {
+    params: { target_device_ip: ipAddress },
     headers: {
       'Cache-Control': 'no-cache',
       'Pragma': 'no-cache',
@@ -99,7 +104,7 @@ export const fetchRaspberryQueue = async () => {
  * @param payload 추가할 테스트 정보
  */
 export const addRaspberryQueue = async (
-  payload: { name: string }
+  payload: { name: string; target_device_ip: string }
 ) => {
   const response = await apiClient.post(`/api/v1/raspberry/pgm_queue`, payload);
   return response.data;

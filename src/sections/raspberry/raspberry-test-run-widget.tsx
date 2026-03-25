@@ -21,9 +21,9 @@ import { Iconify } from 'src/components/iconify';
 
 import { useTestRun, MOCK_SCENARIOS } from './core/use-raspberry-test-run';
 
-type Props = {
+interface Props {
   ipAddress: string;
-};
+}
 
 export function TestRunWidget({ ipAddress }: Props) {
   const {
@@ -208,7 +208,7 @@ export function TestRunWidget({ ipAddress }: Props) {
                             </Typography>
                             <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'text.disabled' }} />
                             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                              {`${item.createdAt.toLocaleDateString()} ${item.createdAt.toLocaleTimeString()}`}
+                              {`${item.created_at.toLocaleDateString()} ${item.created_at.toLocaleTimeString()}`}
                             </Typography>
                           </Stack>
                         }

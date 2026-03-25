@@ -35,10 +35,10 @@ export function RaspberryDashboardView() {
           RaspberryPi ATE PoC Dashboard
         </Typography>
 
-        <RaspberryIpSetting 
-          inputIp={inputIp} 
-          onIpChange={handleIpChange} 
-          onApplyIp={handleApplyIp} 
+        <RaspberryIpSetting
+          inputIp={inputIp}
+          onIpChange={handleIpChange}
+          onApplyIp={handleApplyIp}
         />
       </Box>
 
