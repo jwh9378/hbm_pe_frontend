@@ -48,6 +48,7 @@ export function TestRunWidget({ ipAddress }: Props) {
     handleAddQueue,
     handleRemoveQueue,
     formatTime,
+    progressInfo,
   } = useTestRun(ipAddress);
 
   const [confirmStopOpen, setConfirmStopOpen] = useState(false);
@@ -125,6 +126,11 @@ export function TestRunWidget({ ipAddress }: Props) {
                       ? runningTest.label
                       : 'No test is currently running'}
                   </Typography>
+                  {isRunning && progressInfo && (
+                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                      ({progressInfo.step_index} / {progressInfo.total_steps}) {progressInfo.current_tc}
+                    </Typography>
+                  )}
                 </Box>
               </Box>
 

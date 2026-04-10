@@ -16,6 +16,7 @@ export const MOCK_SCENARIOS = [
   { label: 'Test Scenario 1 (Basic)' },
   { label: 'Test Scenario 2 (Advanced)' },
   { label: 'Test Scenario 3 (Full Check)' },
+  { label: 'Test Scenario 4 (Quick Run)' },
 ];
 
 type TestStatus = 'PENDING' | 'RUNNING' | 'COMPLETED' | 'ABORTED' | 'ERROR';
@@ -31,7 +32,8 @@ export interface QueueItem {
 type WsMessage =
   | { type: 'TEST_STATUS_CHANGED'; id: number; status: 'PENDING' | 'RUNNING' }
   | { type: 'TEST_COMPLETED'; id: number; status: 'COMPLETED' }
-  | { type: 'QUEUE_PAUSED'; id: number; status: 'ABORTED' | 'ERROR'; message?: string };
+  | { type: 'QUEUE_PAUSED'; id: number; status: 'ABORTED' | 'ERROR'; message?: string }
+  | { type: 'TEST_PLAN_PROGRESS'; payload: { step_index: number; total_steps: number; current_tc: string; [key: string]: any } };
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -47,6 +49,7 @@ export function useTestRun(ipAddress: string) {
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [isWsConnected, setIsWsConnected] = useState<boolean>(false);
+  const [progressInfo, setProgressInfo] = useState<{ step_index: number; total_steps: number; current_tc: string } | null>(null);
 
   const { errorMessage, setErrorMessage, handleCloseError } = useErrorMessage();
 
@@ -75,6 +78,7 @@ export function useTestRun(ipAddress: string) {
       } else {
         setRunningTest(null);
         setIsRunning(false);
+        setProgressInfo(null);
       }
 
       setQueue(pendingItems);
@@ -121,8 +125,13 @@ export function useTestRun(ipAddress: string) {
 
         if (!data) return;
 
+        if (data.type === 'TEST_PLAN_PROGRESS') {
+          const { step_index, total_steps, current_tc } = data.payload;
+          setProgressInfo({ step_index, total_steps, current_tc });
+          return;
+        }
         // 상태 변경, 테스트 완료, 큐 일시정지 이벤트 발생 시 큐 상태를 최신화
-        if (
+        else if (
           data.type === 'TEST_STATUS_CHANGED' ||
           data.type === 'TEST_COMPLETED' ||
           data.type === 'QUEUE_PAUSED'
@@ -230,5 +239,6 @@ export function useTestRun(ipAddress: string) {
     handleAddQueue,
     handleRemoveQueue,
     formatTime,
+    progressInfo,
   };
 }
