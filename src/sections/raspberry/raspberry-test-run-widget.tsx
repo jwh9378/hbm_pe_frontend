@@ -57,7 +57,8 @@ export function TestRunWidget({ ipAddress }: Props) {
   const hiddenCount = totalPendingCount - queue.length;
 
   return (
-    <Card>
+    <>
+      <Card>
       <CardHeader title="Test Run"/>
       <CardContent>
         <Stack spacing={1.5}>
@@ -105,6 +106,7 @@ export function TestRunWidget({ ipAddress }: Props) {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 p: 1,
+                height: 58,
                 border: (theme) => `solid 1px ${theme.palette.divider}`,
                 borderRadius: 1.5,
                 bgcolor: 'background.paper',
@@ -114,21 +116,29 @@ export function TestRunWidget({ ipAddress }: Props) {
               {isRunning && (
                 <LinearProgress color="primary" sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2 }} />
               )}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pl: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pl: 0.5, flex: 1, minWidth: 0 }}>
                 <Iconify
                   icon={isRunning ? "mdi:speedometer" : "mdi:sleep"}
                   width={24}
                   sx={{ color: isRunning ? 'primary.main' : 'text.disabled' }}
                 />
-                <Box>
-                  <Typography variant="subtitle2" color={isRunning ? 'text.primary' : 'text.disabled'}>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="subtitle2" noWrap color={isRunning ? 'text.primary' : 'text.disabled'}>
                     {isRunning && runningTest
                       ? runningTest.label
                       : 'No test is currently running'}
                   </Typography>
-                  {isRunning && progressInfo && (
-                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-                      ({progressInfo.step_index} / {progressInfo.total_steps}) {progressInfo.current_tc}
+                  {isRunning && (
+                    <Typography
+                      variant="caption"
+                      noWrap
+                      sx={{
+                        color: 'text.secondary',
+                        display: 'block',
+                        visibility: progressInfo ? 'visible' : 'hidden',
+                      }}
+                    >
+                      {progressInfo ? `(${progressInfo.step_index} / ${progressInfo.total_steps}) ${progressInfo.current_tc}` : '\u00A0'}
                     </Typography>
                   )}
                 </Box>
@@ -253,6 +263,7 @@ export function TestRunWidget({ ipAddress }: Props) {
           </Box>
         </Stack>
       </CardContent>
+      </Card>
 
       <Snackbar
         open={!!errorMessage}
@@ -286,6 +297,6 @@ export function TestRunWidget({ ipAddress }: Props) {
           </Button>
         </DialogActions>
       </Dialog>
-    </Card>
+    </>
   );
 }

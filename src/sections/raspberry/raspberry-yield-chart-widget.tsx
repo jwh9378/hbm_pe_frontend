@@ -33,7 +33,7 @@ export function RaspberryYieldChartWidget() {
       </Box>
       
       <Box sx={{ px: 1.5, pb: 1.5 }} dir="ltr">
-        <Box sx={{ position: 'relative', height: 210 }}>
+        <Box sx={{ position: 'relative', height: 218 }}>
           <Stack direction="row" alignItems="flex-end" justifyContent="space-between" sx={{ height: '100%' }}>
             {MOCK_YIELD_DATA.map((item, index) => {
               const passHeight = (item.pass / maxTotal) * 100;
