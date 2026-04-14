@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -56,6 +56,22 @@ export function TestRunWidget({ ipAddress }: Props) {
   const totalPendingCount = Math.max(0, totalCount - (isRunning ? 1 : 0));
   const hiddenCount = totalPendingCount - queue.length;
 
+  // 히스토리 모달 등 외부에서 재실행(Re-run) 요청이 올 때 큐에 추가하도록 이벤트 리스너 등록
+  useEffect(() => {
+    const handleRequestReRun = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      const scenario = customEvent.detail;
+      setSelectedScenario(scenario);
+      
+      // React 상태가 반영될 시간을 짧게 준 뒤 'Add to Queue' 버튼을 클릭 트리거하여 대기열에 추가합니다.
+      setTimeout(() => {
+        document.getElementById('add-queue-btn')?.click();
+      }, 50);
+    };
+    window.addEventListener('request-rerun', handleRequestReRun);
+    return () => window.removeEventListener('request-rerun', handleRequestReRun);
+  }, [setSelectedScenario]);
+
   return (
     <>
       <Card>
@@ -81,6 +97,7 @@ export function TestRunWidget({ ipAddress }: Props) {
             </TextField>
 
             <Button
+              id="add-queue-btn"
               variant="outlined"
               color="inherit"
               onClick={handleAddQueue}

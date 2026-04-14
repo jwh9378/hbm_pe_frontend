@@ -106,6 +106,14 @@ export function RaspberryTestHistoryWidget({ ipAddress }: Props) {
     URL.revokeObjectURL(url);
   };
 
+  const handleReRun = () => {
+    if (!selectedTest) return;
+    // TestRunWidget으로 시나리오를 전달하여 Pending Queue에 추가하도록 이벤트 발생
+    window.dispatchEvent(new CustomEvent('request-rerun', { detail: selectedTest.scenario }));
+    handleCloseDialog();
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // 상단 Test Run 화면으로 스크롤 이동
+  };
+
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilterScenario(event.target.value);
     setPage(0); // 필터 변경 시 첫 페이지로 이동
@@ -451,6 +459,15 @@ export function RaspberryTestHistoryWidget({ ipAddress }: Props) {
         )}
 
         <DialogActions>
+          <Button
+            onClick={handleReRun}
+            startIcon={<Iconify icon="mdi:play-circle-outline" />}
+            variant="contained"
+            color="primary"
+            sx={{ mr: 'auto' }}
+          >
+            Re-run
+          </Button>
           <Button
             onClick={handleDownloadLogs}
             startIcon={<Iconify icon="mdi:download" />}
