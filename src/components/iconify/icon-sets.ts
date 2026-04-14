@@ -137,6 +137,9 @@ export default {
   "mdi:close-circle": {
     body: '<path fill="currentColor" d="M12 2c5.53 0 10 4.47 10 10s-4.47 10-10 10S2 17.53 2 12S6.47 2 12 2m3.59 5L12 10.59L8.41 7L7 8.41L10.59 12L7 15.59L8.41 17L12 13.41L15.59 17L17 15.59L13.41 12L17 8.41z"></path>'
   },
+  "mdi:stop-circle": {
+    body: '<path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2M9 9h6v6H9"></path>'
+  },
   "mdi:filter-off-outline": {
     body: '<path fill="currentColor" d="M2.39 1.73L1.11 3L9 10.89v4.98c-.04.29.06.6.29.83l4.01 4.01c.39.39 1.02.39 1.41 0c.23-.21.33-.53.29-.83v-2.99l5.84 5.84l1.27-1.27L15 14.35v-.01l-2-1.99l-2-2.01L4.15 3.5zM6.21 3L8.2 5h8.76l-3.85 4.91L15 11.8v-1.05l4.79-6.13a1 1 0 0 0-.17-1.4c-.19-.14-.4-.22-.62-.22zM11 12.89l2 2v2.69l-2-2z"></path>'
   },
@@ -149,4 +152,10 @@ export default {
   "mdi:download": {
     body: '<path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path>'
   },
+  "mdi:loading": {
+    body: '<path fill="currentColor" d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8"></path>'
+  },
+  "mdi:refresh": {
+    body: '<path fill="currentColor" d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 0 0-8 8a8 8 0 0 0 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18a6 6 0 0 1-6-6a6 6 0 0 1 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"></path>'
+  }
 };

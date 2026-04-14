@@ -68,7 +68,9 @@ export function RaspberryDashboardView() {
       </Grid>
 
       <Box sx={{ mt: 2 }}>
-        <RaspberryTestHistoryWidget />
+        <RaspberryTestHistoryWidget
+          ipAddress={ipAddress}
+        />
       </Box>
     </DashboardContent>
   );

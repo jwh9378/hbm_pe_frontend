@@ -118,3 +118,19 @@ export const removeRaspberryQueue = async (id: number) => {
   const response = await apiClient.delete(`/api/v1/raspberry/pgm_queue/${id}`);
   return response.data;
 };
+
+/**
+ * 라즈베리파이의 완료된 테스트 히스토리 목록을 조회합니다.
+ * @param ipAddress 대상 기기 IP 주소
+ */
+export const fetchRaspberryHistory = async (ipAddress: string) => {
+  const response = await apiClient.get(`/api/v1/raspberry/pgm_queue/history`, {
+    params: { target_device_ip: ipAddress },
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
+  return response.data;
+};

@@ -30,58 +30,45 @@ import TablePagination from '@mui/material/TablePagination';
 
 import { Iconify } from 'src/components/iconify';
 
-const MOCK_HISTORY = [
-  { id: 'T-0012', scenario: 'Test Scenario 2 (Advanced)', startTime: '2023-10-28 10:15:00', duration: '4m 55s', status: 'PASS' },
-  { id: 'T-0011', scenario: 'Test Scenario 1 (Basic)', startTime: '2023-10-28 09:30:00', duration: '1m 21s', status: 'PASS' },
-  { id: 'T-0010', scenario: 'Test Scenario 3 (Full Check)', startTime: '2023-10-28 08:00:00', duration: '14m 45s', status: 'FAIL' },
-  { id: 'T-0009', scenario: 'Test Scenario 1 (Basic)', startTime: '2023-10-27 16:45:00', duration: '1m 19s', status: 'PASS' },
-  { id: 'T-0008', scenario: 'Test Scenario 2 (Advanced)', startTime: '2023-10-27 15:30:00', duration: '5m 05s', status: 'PASS' },
-  { id: 'T-0007', scenario: 'Test Scenario 1 (Basic)', startTime: '2023-10-27 15:00:00', duration: '1m 20s', status: 'PASS' },
-  { id: 'T-0006', scenario: 'Test Scenario 3 (Full Check)', startTime: '2023-10-27 14:30:00', duration: '15m 10s', status: 'FAIL' },
-  { id: 'T-0005', scenario: 'Test Scenario 1 (Basic)', startTime: '2023-10-27 14:20:00', duration: '1m 20s', status: 'PASS' },
-  { id: 'T-0004', scenario: 'Test Scenario 2 (Advanced)', startTime: '2023-10-27 13:45:00', duration: '5m 10s', status: 'FAIL' },
-  { id: 'T-0003', scenario: 'Test Scenario 1 (Basic)', startTime: '2023-10-27 11:10:00', duration: '1m 18s', status: 'PASS' },
-  { id: 'T-0002', scenario: 'Test Scenario 3 (Full Check)', startTime: '2023-10-27 09:00:00', duration: '15m 30s', status: 'PASS' },
-  { id: 'T-0001', scenario: 'Test Scenario 1 (Basic)', startTime: '2023-10-26 16:30:00', duration: '1m 22s', status: 'FAIL' },
-];
+import { useTestHistory, HistoryItem } from './core/use-raspberry-test-history';
 
-// MOCK_HISTORY에서 고유한 시나리오 목록 추출
-const SCENARIO_OPTIONS = ['All Scenarios', ...Array.from(new Set(MOCK_HISTORY.map((item) => item.scenario)))];
-const STATUS_OPTIONS = ['All Status', 'PASS', 'FAIL'];
-
-// Duration 문자열("1m 20s" 등)을 초(seconds) 단위 숫자로 변환하는 헬퍼 함수
-function parseDurationToSeconds(duration: string) {
-  let totalSeconds = 0;
-  const minMatch = duration.match(/(\d+)m/);
-  const secMatch = duration.match(/(\d+)s/);
-  if (minMatch) totalSeconds += parseInt(minMatch[1], 10) * 60;
-  if (secMatch) totalSeconds += parseInt(secMatch[1], 10);
-  return totalSeconds;
+interface Props {
+  ipAddress: string;
 }
 
-export function RaspberryTestHistoryWidget() {
+export function RaspberryTestHistoryWidget({ ipAddress }: Props) {
   const theme = useTheme();
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  
+  const {
+    isLoading,
+    paginatedData,
+    totalFilteredCount,
+    scenarioOptions,
+    statusOptions,
+    page,
+    setPage,
+    rowsPerPage,
+    filterScenario,
+    setFilterScenario,
+    filterDate,
+    setFilterDate,
+    filterStatus,
+    setFilterStatus,
+    order,
+    orderBy,
+    handleClearFilters,
+    handleSort,
+    handleChangePage,
+    handleChangeRowsPerPage,
+    isFiltered,
+    fetchHistory,
+  } = useTestHistory(ipAddress);
+
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedTest, setSelectedTest] = useState<typeof MOCK_HISTORY[0] | null>(null);
-  const [filterScenario, setFilterScenario] = useState(SCENARIO_OPTIONS[0]);
-  const [filterDate, setFilterDate] = useState(''); // 날짜 필터용 상태 추가
-  const [filterStatus, setFilterStatus] = useState(STATUS_OPTIONS[0]); // 상태 필터용 상태 추가
-  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
-  const [orderBy, setOrderBy] = useState<string>(''); // 정렬 기준 열
+  const [selectedTest, setSelectedTest] = useState<HistoryItem | null>(null);
   const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLButtonElement | null>(null); // 필터 Popover 기준점
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const handleRowClick = (row: typeof MOCK_HISTORY[0]) => {
+  const handleRowClick = (row: HistoryItem) => {
     setSelectedTest(row);
     setOpenDialog(true);
   };
@@ -94,10 +81,17 @@ export function RaspberryTestHistoryWidget() {
   const handleDownloadLogs = () => {
     if (!selectedTest) return;
     
+    const logMessage = selectedTest.status === 'COMPLETED'
+      ? '[SUCCESS] All checks completed without errors.'
+      : selectedTest.status === 'ABORTED'
+      ? '[WARNING] Test aborted.'
+      : '[ERROR] Validation failed during component checking.';
+
     const logs = [
       `[SYSTEM] Initializing test sequence for ${selectedTest.id}...`,
       `[SYSTEM] Loading scenario: ${selectedTest.scenario}...`,
-      selectedTest.status === 'PASS' ? '[SUCCESS] All checks completed without errors.' : '[ERROR] Validation failed during component checking.',
+      `[INFO] Test Cases - Passed: ${selectedTest.status === 'COMPLETED' ? selectedTest.passedCount : '-'}, Failed: ${selectedTest.status === 'COMPLETED' ? selectedTest.failedCount : '-'}`,
+      logMessage,
       `[SYSTEM] Test finalized in ${selectedTest.duration}.`
     ].join('\n');
 
@@ -127,12 +121,6 @@ export function RaspberryTestHistoryWidget() {
     setPage(0); // 상태 변경 시 첫 페이지로 이동
   };
 
-  const handleSort = (property: string) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
   const handleOpenFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
     setFilterAnchorEl(event.currentTarget);
   };
@@ -141,43 +129,8 @@ export function RaspberryTestHistoryWidget() {
     setFilterAnchorEl(null);
   };
 
-  const handleClearFilters = () => {
-    setFilterDate('');
-    setFilterScenario(SCENARIO_OPTIONS[0]);
-    setFilterStatus(STATUS_OPTIONS[0]);
-    setPage(0);
-  };
-
-  const isFiltered = filterDate !== '' || filterScenario !== SCENARIO_OPTIONS[0] || filterStatus !== STATUS_OPTIONS[0];
-
-  // 선택된 시나리오, 날짜, 상태에 맞게 데이터 필터링
-  const filteredHistory = MOCK_HISTORY.filter(
-    (row) => 
-      (filterScenario === 'All Scenarios' || row.scenario === filterScenario) &&
-      (filterDate === '' || row.startTime.startsWith(filterDate)) && // YYYY-MM-DD 형식 비교
-      (filterStatus === 'All Status' || row.status === filterStatus) // 상태 비교
-  );
-
-  // 필터링된 데이터를 기준으로 정렬 적용
-  const sortedHistory = [...filteredHistory].sort((a, b) => {
-    if (orderBy === 'duration') {
-      const aSec = parseDurationToSeconds(a.duration);
-      const bSec = parseDurationToSeconds(b.duration);
-      return order === 'asc' ? aSec - bSec : bSec - aSec;
-    }
-    if (orderBy === 'startTime') {
-      const aTime = new Date(a.startTime).getTime();
-      const bTime = new Date(b.startTime).getTime();
-      return order === 'asc' ? aTime - bTime : bTime - aTime;
-    }
-    return 0; // 정렬 기준이 없으면 원래 순서 유지
-  });
-
-  // 정렬된 데이터를 기준으로 페이지네이션 자르기
-  const paginatedData = sortedHistory.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-
   // 데이터 없음 및 빈 행 계산 (테이블 높이 고정용)
-  const notFound = sortedHistory.length === 0;
+  const notFound = paginatedData.length === 0;
   const emptyRows = rowsPerPage - paginatedData.length;
 
   return (
@@ -185,13 +138,26 @@ export function RaspberryTestHistoryWidget() {
       <CardHeader
         title="Recent Test History"
         action={
-          <Tooltip title="Filter list">
-            <IconButton onClick={handleOpenFilter} color={isFiltered ? 'primary' : 'default'}>
-              <Badge color="error" variant="dot" invisible={!isFiltered}>
-                <Iconify icon="mdi:filter-variant" width={24} />
-              </Badge>
-            </IconButton>
-          </Tooltip>
+          <Stack direction="row" spacing={1}>
+            <Tooltip title="Refresh">
+              <span>
+                <IconButton onClick={fetchHistory} disabled={isLoading}>
+                  <Iconify
+                    icon={isLoading ? 'mdi:loading' : 'mdi:refresh'}
+                    width={24}
+                    sx={isLoading ? { animation: 'spin 1s linear infinite', '@keyframes spin': { '100%': { transform: 'rotate(360deg)' } } } : {}}
+                  />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title="Filter list">
+              <IconButton onClick={handleOpenFilter} color={isFiltered ? 'primary' : 'default'}>
+                <Badge color="error" variant="dot" invisible={!isFiltered}>
+                  <Iconify icon="mdi:filter-variant" width={24} />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+          </Stack>
         }
         sx={{ p: 3, pb: 2 }}
       />
@@ -220,6 +186,7 @@ export function RaspberryTestHistoryWidget() {
                     Duration
                   </TableSortLabel>
                 </TableCell>
+                <TableCell>Test Cases</TableCell>
                 <TableCell sx={{ borderTopRightRadius: 8, borderBottomRightRadius: 8 }}>Status</TableCell>
               </TableRow>
             </TableHead>
@@ -252,17 +219,30 @@ export function RaspberryTestHistoryWidget() {
                     </Typography>
                   </TableCell>
                   <TableCell>
+                    {row.status === 'COMPLETED' ? (
+                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                        <Typography variant="body2" color="success.main" sx={{ fontWeight: 'fontWeightMedium' }}>{row.passedCount}</Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>Pass</Typography>
+                        <Typography variant="body2" color="text.disabled" sx={{ mx: 0.5 }}>/</Typography>
+                        <Typography variant="body2" color="error.main" sx={{ fontWeight: 'fontWeightMedium' }}>{row.failedCount}</Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>Fail</Typography>
+                      </Stack>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>-</Typography>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <Chip
                       label={row.status}
                       size="small"
-                      icon={<Iconify icon={row.status === 'PASS' ? 'mdi:check-circle' : 'mdi:close-circle'} />}
-                      sx={{ 
+                    icon={<Iconify icon={row.status === 'COMPLETED' ? 'mdi:check-circle' : row.status === 'ABORTED' ? 'mdi:stop-circle' : 'mdi:close-circle'} />}
+                      sx={{
                         fontWeight: 'fontWeightBold',
                         px: 0.5,
-                        bgcolor: alpha(theme.palette[row.status === 'PASS' ? 'success' : 'error'].main, 0.16),
-                        color: theme.palette[row.status === 'PASS' ? 'success' : 'error'].dark,
+                      bgcolor: alpha(theme.palette[row.status === 'COMPLETED' ? 'success' : row.status === 'ABORTED' ? 'warning' : 'error'].main, 0.16),
+                      color: theme.palette[row.status === 'COMPLETED' ? 'success' : row.status === 'ABORTED' ? 'warning' : 'error'].dark,
                         border: 'none',
-                        '& .MuiChip-icon': { color: theme.palette[row.status === 'PASS' ? 'success' : 'error'].main }
+                      '& .MuiChip-icon': { color: theme.palette[row.status === 'COMPLETED' ? 'success' : row.status === 'ABORTED' ? 'warning' : 'error'].main }
                       }}
                       variant="outlined"
                     />
@@ -273,14 +253,14 @@ export function RaspberryTestHistoryWidget() {
               {/* 표시할 데이터가 부족할 경우 빈 공간을 채워 테이블 높이 고정 */}
               {emptyRows > 0 && !notFound && (
                 <TableRow sx={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={5} />
+                  <TableCell colSpan={6} />
                 </TableRow>
               )}
 
               {/* 데이터가 아예 없을 때 (No Data) */}
               {notFound && (
                 <TableRow sx={{ height: 53 * rowsPerPage }}>
-                  <TableCell colSpan={5} align="center">
+                  <TableCell colSpan={6} align="center">
                     <Stack
                       alignItems="center"
                       justifyContent="center"
@@ -310,7 +290,7 @@ export function RaspberryTestHistoryWidget() {
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={filteredHistory.length}
+        count={totalFilteredCount}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
@@ -338,7 +318,7 @@ export function RaspberryTestHistoryWidget() {
           onChange={handleFilterChange}
           fullWidth
         >
-          {SCENARIO_OPTIONS.map((option) => (
+          {scenarioOptions.map((option) => (
             <MenuItem key={option} value={option}>
               {option}
             </MenuItem>
@@ -363,7 +343,7 @@ export function RaspberryTestHistoryWidget() {
           onChange={handleFilterStatusChange}
           fullWidth
         >
-          {STATUS_OPTIONS.map((option) => (
+          {statusOptions.map((option) => (
             <MenuItem key={option} value={option}>
               {option}
             </MenuItem>
@@ -410,19 +390,19 @@ export function RaspberryTestHistoryWidget() {
               <Chip
                 label={selectedTest.status}
                 size="small"
-                icon={<Iconify icon={selectedTest.status === 'PASS' ? 'mdi:check-circle' : 'mdi:close-circle'} />}
+                icon={<Iconify icon={selectedTest.status === 'COMPLETED' ? 'mdi:check-circle' : selectedTest.status === 'ABORTED' ? 'mdi:stop-circle' : 'mdi:close-circle'} />}
                 sx={{
                   fontWeight: 'fontWeightBold',
                   px: 0.5,
-                  bgcolor: alpha(theme.palette[selectedTest.status === 'PASS' ? 'success' : 'error'].main, 0.16),
-                  color: theme.palette[selectedTest.status === 'PASS' ? 'success' : 'error'].dark,
+                  bgcolor: alpha(theme.palette[selectedTest.status === 'COMPLETED' ? 'success' : selectedTest.status === 'ABORTED' ? 'warning' : 'error'].main, 0.16),
+                  color: theme.palette[selectedTest.status === 'COMPLETED' ? 'success' : selectedTest.status === 'ABORTED' ? 'warning' : 'error'].dark,
                   border: 'none',
-                  '& .MuiChip-icon': { color: theme.palette[selectedTest.status === 'PASS' ? 'success' : 'error'].main }
+                  '& .MuiChip-icon': { color: theme.palette[selectedTest.status === 'COMPLETED' ? 'success' : selectedTest.status === 'ABORTED' ? 'warning' : 'error'].main }
                 }}
                 variant="outlined"
               />
             </DialogTitle>
-            
+
             <DialogContent dividers sx={{ pt: 3, pb: 4, px: 3 }}>
               <Stack spacing={3}>
                 {/* 메타 정보 Grid */}
@@ -439,6 +419,14 @@ export function RaspberryTestHistoryWidget() {
                     <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>Duration</Typography>
                     <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 'fontWeightMedium' }}>{selectedTest.duration}</Typography>
                   </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>Passed</Typography>
+                    <Typography variant="body2" color={selectedTest.status === 'COMPLETED' ? "success.main" : "text.secondary"} sx={{ fontWeight: 'fontWeightBold' }}>{selectedTest.status === 'COMPLETED' ? selectedTest.passedCount : '-'}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>Failed</Typography>
+                    <Typography variant="body2" color={selectedTest.status === 'COMPLETED' ? "error.main" : "text.secondary"} sx={{ fontWeight: 'fontWeightBold' }}>{selectedTest.status === 'COMPLETED' ? selectedTest.failedCount : '-'}</Typography>
+                  </Box>
                 </Box>
                 
                 {/* 로그 영역 (터미널 스타일) */}
@@ -450,8 +438,9 @@ export function RaspberryTestHistoryWidget() {
                     <Box sx={{ color: theme.palette.success.main, mb: 1 }}>$ init_test {selectedTest.id}</Box>
                     <div>[SYSTEM] Initializing test sequence...</div>
                     <div>[SYSTEM] Loading scenario: {selectedTest.scenario}...</div>
-                    <Box sx={{ color: selectedTest.status === 'PASS' ? theme.palette.success.main : theme.palette.error.main, my: 1 }}>
-                      {selectedTest.status === 'PASS' ? '>[SUCCESS] All checks completed without errors.' : '>[ERROR] Validation failed during component checking.'}
+                    <div>[INFO] Test Cases - Passed: {selectedTest.status === 'COMPLETED' ? selectedTest.passedCount : '-'}, Failed: {selectedTest.status === 'COMPLETED' ? selectedTest.failedCount : '-'}</div>
+                  <Box sx={{ color: selectedTest.status === 'COMPLETED' ? theme.palette.success.main : selectedTest.status === 'ABORTED' ? theme.palette.warning.main : theme.palette.error.main, my: 1 }}>
+                    {selectedTest.status === 'COMPLETED' ? '>[SUCCESS] All checks completed without errors.' : selectedTest.status === 'ABORTED' ? '>[WARNING] Test aborted.' : '>[ERROR] Validation failed during component checking.'}
                     </Box>
                     <div>[SYSTEM] Test finalized in {selectedTest.duration}.</div>
                   </Box>
