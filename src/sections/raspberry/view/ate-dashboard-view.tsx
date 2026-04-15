@@ -61,7 +61,9 @@ export function RaspberryDashboardView() {
 
         <Grid size={{ xs: 12, md: 5 }}>
           <Stack spacing={2}>
-            <RaspberryYieldChartWidget />
+            <RaspberryYieldChartWidget
+              ipAddress={ipAddress}
+            />
             <RaspberryFailPieChartWidget />
           </Stack>
         </Grid>

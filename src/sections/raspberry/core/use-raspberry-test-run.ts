@@ -137,6 +137,8 @@ export function useTestRun(ipAddress: string) {
           data.type === 'QUEUE_PAUSED'
         ) {
           fetchQueue();
+          // 차트 컴포넌트 등 다른 곳에 변경 사항을 알리기 위한 커스텀 이벤트 발생
+          window.dispatchEvent(new CustomEvent('raspberry-history-update'));
         }
 
         // 테스트 실패 또는 큐 일시정지 시 스낵바(에러 메시지)에 메시지 출력
