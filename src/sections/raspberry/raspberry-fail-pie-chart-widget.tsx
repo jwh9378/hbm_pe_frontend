@@ -1,3 +1,5 @@
+import { useState, useEffect, useCallback } from 'react';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -5,13 +7,9 @@ import Tooltip from '@mui/material/Tooltip';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
-// 자주 실패하는 테스트 임시 데이터
-const MOCK_FAIL_DATA = [
-  { id: 'T-03', label: 'Full Check', count: 45, color: '#FF5630' },
-  { id: 'T-02', label: 'Advanced Check', count: 25, color: '#FFAB00' },
-  { id: 'T-01', label: 'Basic Check', count: 15, color: '#00B8D9' },
-  { id: 'T-04', label: 'Quick Run', count: 5, color: '#8E33FF' },
-];
+import { Iconify } from 'src/components/iconify';
+
+import { fetchScenarioStats } from './hooks/use-raspberry-axios';
 
 // SVG 도넛 차트 상수
 const SIZE = 120;
@@ -19,20 +17,68 @@ const STROKE_WIDTH = 22;
 const RADIUS = 49;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-export function RaspberryFailPieChartWidget() {
+const FAIL_COLORS = ['#FF5630', '#FFAB00', '#00B8D9', '#8E33FF', '#36B37E'];
+
+interface FailStat {
+  id: string;
+  label: string;
+  count: number;
+  color: string;
+}
+
+interface Props {
+  ipAddress: string;
+}
+
+export function RaspberryFailPieChartWidget({ ipAddress }: Props) {
   const theme = useTheme();
-  const total = MOCK_FAIL_DATA.reduce((acc, item) => acc + item.count, 0);
+  const [failData, setFailData] = useState<FailStat[]>([]);
+
+  const fetchChartData = useCallback(async () => {
+    if (!ipAddress) return;
+    try {
+      const response = await fetchScenarioStats(ipAddress);
+      const items = Array.isArray(response) ? response : [];
+
+      const formattedData = items
+        .filter((item: any) => item.total_failed > 0)
+        .sort((a: any, b: any) => b.total_failed - a.total_failed)
+        .slice(0, 4)
+        .map((item: any, index: number) => ({
+          id: item.name,
+          label: item.name,
+          count: item.total_failed,
+          color: FAIL_COLORS[index % FAIL_COLORS.length],
+        }));
+
+      setFailData(formattedData);
+    } catch (error) {
+      console.error('Failed to fetch scenario stats:', error);
+      setFailData([]);
+    }
+  }, [ipAddress]);
+
+  useEffect(() => {
+    fetchChartData();
+
+    window.addEventListener('raspberry-history-update', fetchChartData);
+    return () => {
+      window.removeEventListener('raspberry-history-update', fetchChartData);
+    };
+  }, [fetchChartData]);
+
+  const total = failData.reduce((acc, item) => acc + item.count, 0);
 
   // SVG 도넛 차트 조각 계산
   let accumulatedPercent = 0;
-  const slices = MOCK_FAIL_DATA.map((item) => {
+  const slices = failData.map((item) => {
     const percent = (item.count / total) * 100;
     const dashLength = (percent / 100) * CIRCUMFERENCE;
     // 미세한 빈틈 렌더링 방지를 위해 길이에 +1을 더함
     const strokeDasharray = `${dashLength + 1} ${CIRCUMFERENCE}`;
     const strokeDashoffset = -((accumulatedPercent / 100) * CIRCUMFERENCE);
     accumulatedPercent += percent;
-    
+
     return {
       ...item,
       percent: percent.toFixed(1),
@@ -43,10 +89,12 @@ export function RaspberryFailPieChartWidget() {
 
   return (
     <Card>
-      <Box sx={{ px: 2, pt: 2, pb: 3 }}>
+      <Box sx={{ px: 2, pt: 2, pb: failData.length > 0 ? 3 : 2 }}>
         <Typography variant="subtitle1">Frequent Failures</Typography>
       </Box>
-      <Box sx={{ px: 2, pb: 3.5, display: 'flex', alignItems: 'center', gap: 4 }}>
+
+      {failData.length > 0 ? (
+        <Box sx={{ px: 2, pb: 3.5, display: 'flex', alignItems: 'center', gap: 4 }}>
       {/* 도넛 차트 영역 (SVG 기반) */}
       <Box
         sx={{
@@ -110,9 +158,9 @@ export function RaspberryFailPieChartWidget() {
       {/* 범례 및 통계 목록 영역 */}
       <Box sx={{ flexGrow: 1 }}>
         <Stack spacing={1.5}>
-          {MOCK_FAIL_DATA.map((item, index) => {
+          {failData.map((item, index) => {
             const percent = ((item.count / total) * 100).toFixed(1);
-            
+
             return (
               <Tooltip key={item.id} title={`${percent}%`} arrow placement="top">
                 <Stack
@@ -142,7 +190,15 @@ export function RaspberryFailPieChartWidget() {
           })}
         </Stack>
       </Box>
-      </Box>
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160, color: 'text.disabled' }}>
+          <Stack alignItems="center" spacing={1}>
+            <Iconify icon="mdi:chart-arc" width={40} />
+            <Typography variant="body2">No failure data available</Typography>
+          </Stack>
+        </Box>
+      )}
     </Card>
   );
 }

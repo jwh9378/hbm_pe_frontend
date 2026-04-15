@@ -150,3 +150,19 @@ export const fetchRecentStatusHistory = async (ipAddress: string) => {
   });
   return response.data;
 };
+
+/**
+ * 시나리오별 테스트 통계(pass/fail)를 조회합니다.
+ * @param ipAddress 대상 기기 IP 주소
+ */
+export const fetchScenarioStats = async (ipAddress: string) => {
+  const response = await apiClient.get(`/api/v1/raspberry/pgm_queue/stats_by_scenario`, {
+    params: { target_device_ip: ipAddress },
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
+  return response.data;
+};

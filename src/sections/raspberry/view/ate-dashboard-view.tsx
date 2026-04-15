@@ -64,7 +64,9 @@ export function RaspberryDashboardView() {
             <RaspberryYieldChartWidget
               ipAddress={ipAddress}
             />
-            <RaspberryFailPieChartWidget />
+            <RaspberryFailPieChartWidget
+              ipAddress={ipAddress}
+            />
           </Stack>
         </Grid>
       </Grid>
